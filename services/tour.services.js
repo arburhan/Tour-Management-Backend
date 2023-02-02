@@ -1,9 +1,15 @@
 const TourDesignSchema = require('../models/Tour.Model');
 
 // get tours
-exports.getToursService = async () => {
-    const tours = await TourDesignSchema.find({})
-    return tours;
+exports.getToursService = async (queries, queryObj) => {
+    const total = await TourDesignSchema.countDocuments(queries);
+    const pageCount = Math.ceil((total / queries.limit));
+    const tours = await TourDesignSchema.find(queryObj)
+        .sort(queries.sortBy)
+        .select(queries.fields)
+        .skip(queries.skip)
+        .limit(queries.limit);
+    return { tours, total, pageCount };
 }
 
 // create tours

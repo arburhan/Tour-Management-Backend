@@ -3,7 +3,34 @@ const { getToursService, createToursService, getSingleToursService, updateSingle
 // get tours
 exports.getTours = async (req, res, next) => {
     try {
-        const tours = await getToursService();
+        // query
+        let queryObj = { ...req.query };
+        let queries = {};
+        const excludeFields = ['sort', 'page', 'limit'];
+        excludeFields.forEach(field => delete queryObj[field]);
+        // sort
+        if (req.query.sort) {
+            const sortBy = req.query.sort.split(',').join(' ');
+            queries.sortBy = sortBy;
+        }
+        // fields
+        if (req.query.fields) {
+            const fields = req.query.fields.split(',').join(' ');
+            queries.fields = fields;
+        }
+        // pagination
+        if (req.query.page) {
+            const { page = 1, limit = 3 } = req.query;
+            const skip = (page - 1) * limit;
+            queries.skip = skip;
+            queries.limit = parseInt(limit);
+        }
+        // query
+        let filterString = JSON.stringify(queryObj);
+        filterString = filterString.replace(/\b(gt|gte|lt|lte)\b/g, match => `$${match}`);
+        queryObj = JSON.parse(filterString);
+        console.log(queryObj);
+        const tours = await getToursService(queries, queryObj);
 
         res.status(200).json({
             status: "success",
