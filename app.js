@@ -11,7 +11,10 @@ app.get("/", (req, res) => {
     res.send("Route is working! YaY!");
 });
 
-// posting to database
+// routes
+const tourRoute = require('./routes/v1/tour.routes');
 
+// posting to database
+app.use('/api/v1/tours', tourRoute)
 
 module.exports = app;
